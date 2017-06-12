@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>IMS Feedback Logger</title>
+    </head>
+    <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout-paging/0.4.0/knockout-paging.min.js"></script> -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="pager.min.js"></script>
+
+        <div class="container">
+         
+            <div data-bind="page: {id: 'show', role: 'start'}">
+                <a data-bind="page-href: '../add'">Add</a>
+                <!-- the previous page -->
+            </div>
+            <div data-bind="page: {id: 'add'}">
+                <a data-bind="page-href: '../'">Back</a>
+
+                <h2>Add new feature request</h2>
+
+                <div>Title</div>
+                <div><input type="text" name="title" data-bind="value: title" placeholder="Enter title" /></div>
+
+                <div>Description</div>
+                <div>
+                    <textarea name="description" data-bind="value: description" placeholder="Enter description"></textarea>
+                </div>
+
+                <div>Client</div>
+                <div>
+                    <select data-bind="options: availableClientOptions,
+                                        value: client,
+                                        optionsCaption: 'Choose here'"></select>
+                </div>
+
+                <div>Client Priority</div>
+                <div>
+                    <input type="number" data-bind="value: client_priority"  placeholder="Enter Priority">
+                </div>
+
+                <div>Date</div>
+                <div><input type="text" id="datepicker" data-bind="value: date"></div>
+
+                <div>Product Area</div>
+                <div>
+                    <select data-bind="options: availableProductsAreas,
+                                        value: product_area,
+                                        optionsCaption: 'Choose here'"></select>
+                </div>
+
+                <div>
+                    <button data-bind="click: submitFeatureRequest">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            pager.Href.hash = '#!/';
+
+            // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
+            function AppViewModel() {
+                this.addRequest = {}
+            }
+
+            function getFormattedDate() {
+                var date = new Date();
+
+                var month = (1 + date.getMonth()).toString();
+                month = month.length > 1 ? month : '0' + month;
+
+                var day = date.getDate().toString();
+                day = day.length > 1 ? day : '0' + day;
+
+                return month + '/' + day + '/' + date.getFullYear();
+            };
+
+            var req_url = "http://127.0.0.1:5000/";
+
+            var viewModel = {
+                title: ko.observable(''),
+                description: ko.observable(''),
+                client: ko.observable(''),
+                date: ko.observable(getFormattedDate()),
+                product_area: ko.observable(''),
+                client_priority: ko.observable(''),
+                availableProductsAreas: ko.observable(['Policies', 'Billing', 'Claims', 'Reports']),
+                availableClientOptions: ko.observable(['Client A', 'Client B', 'Client C']),
+                submitFeatureRequest: function() {
+                    $.post(req_url + "submitFeatureRequest", {
+                        title: this.title(),
+                        description: this.description(),
+                        client: this.client(),
+                        date: this.date(),
+                        product_area: this.product_area(),
+                        client_priority: this.client_priority()
+                    }, function() {
+                        console.log('feature successfully submitted');
+                    })
+                }
+            };
+
+            // extend your view-model with pager.js specific data
+            pager.extendWithPage(viewModel);
+            // Activates knockout.js
+            ko.applyBindings(viewModel);
+
+            // start pager.js
+            pager.start();
+
+            $(function() {
+                $("#datepicker").datepicker({
+                    minDate: 0
+                });
+            });
+        </script>
+    </body>
+</html>
