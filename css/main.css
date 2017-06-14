@@ -33,3 +33,8 @@
     float: left;
     margin-left: -80px;
 }
+
+.filters {
+    text-align: center;
+    padding: 10px;
+}

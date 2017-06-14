@@ -30,19 +30,25 @@
                         </button>
                     </a>
                 </div>
-                <!-- <div class="filters">
+                <div class="filters">
                     <select data-bind="options: availableClientOptions,
                                         value: filters.client,
-                                        optionsCaption: 'All'"></select>
+                                        optionsCaption: 'All'" style="margin-right: 20px;"></select>
 
                     <select data-bind="options: availableProductsAreas,
                                         value: filters.product_area,
                                         optionsCaption: 'All'"></select>
-                </div> -->
-                <div data-bind="template: {name: 'featureTemplate', foreach: display_feats, visible: display_feats().length > 0}"></div>
+                </div>
+                <div data-bind="template: {name: 'featureTemplate', foreach: display_filtered_feats, visible: display_filtered_feats.length > 0}"></div>
                 <div data-bind="visible: display_feats().length == 0">
                     <div class="feature mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp">
                         No feature requests currently present. Please add new feature requests.
+                    </div>
+                </div>
+
+                <div data-bind="visible: display_feats().length > 0 && display_filtered_feats().length == 0">
+                    <div class="feature mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp">
+                        No feature requests matching the current filters.
                     </div>
                 </div>
             </div>
@@ -184,7 +190,6 @@
                         product_area: self.new_feature().product_area(),
                         client_priority: self.new_feature().client_priority()
                     }, function() {
-                        console.log('Feature successfully submitted.');
                         window.location.hash = "#!/show"
                         self.getExistingFeaturesRequest();
                         self.new_feature().resetValues();
@@ -194,19 +199,63 @@
                 }
             };
 
-            var viewModel = {
-                new_feature: ko.observable(new feature_obj()),
-                display_feats: ko.observableArray([]),
-                filters: {'client': ko.observable(''), 'product_area': ko.observable('')},
-                availableProductsAreas: ['Policies', 'Billing', 'Claims', 'Reports'],
-                availableClientOptions: ['Client A', 'Client B', 'Client C'],
-                submitFeatureRequest: featureFormSubmit,
-                getExistingFeaturesRequest: getExistingFeatures
+            var filterFeatures = function() {
+                // console.log(this.display_feats())
+                var feats = this.display_feats(), filt = this.filters;
+                if(feats.length == 0)
+                    return this.display_feats;
+
+                var tmp_results = this.display_feats(), filtered_results = [];
+                if(filt.client() !== undefined) {
+                    $.each(tmp_results, function(index, value) {
+                        if(value.client() == filt.client()) {
+                            filtered_results.push(value);
+                        }
+                    })
+
+                    tmp_results = filtered_results;
+                    filtered_results = [];
+                }
+
+                if(filt.product_area() !== undefined) {
+                    $.each(tmp_results, function(index, value) {
+                        if(value.product_area() == filt.product_area()) {
+                            filtered_results.push(value);
+                        }
+                    })
+
+                    tmp_results = filtered_results;
+                    filtered_results = [];
+                }
+
+                console.log(tmp_results.length);
+                console.log(tmp_results)
+                var self = this;
+                self.display_filtered_feats.splice(0);
+                $.each(tmp_results, function(index, value) {
+                    self.display_filtered_feats.push(value);
+                });
+            }
+
+            var viewModelFn = function() {
+                var self = this;
+
+                self.new_feature = ko.observable(new feature_obj());
+                self.display_feats = ko.observableArray([]);
+                self.display_filtered_feats = ko.observableArray([]);
+                self.filters = {'client': ko.observable(''), 'product_area': ko.observable('')};
+                self.availableProductsAreas = ['Policies', 'Billing', 'Claims', 'Reports'];
+                self.availableClientOptions = ['Client A', 'Client B', 'Client C'];
+                self.submitFeatureRequest = featureFormSubmit;
+                self.filterDisplayFeats = ko.computed(filterFeatures, this)
+                self.getExistingFeaturesRequest = getExistingFeatures;
             };
 
+            var viewModel = new viewModelFn();
 
             // extend your view-model with pager.js specific data
             pager.extendWithPage(viewModel);
+
             // Activates knockout.js
             ko.applyBindings(viewModel);
 

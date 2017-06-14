@@ -2,3 +2,4 @@
 /server/lib/*
 /server/include/*
 /server/__pycache__/*
+/server/pip-selfcheck.json
