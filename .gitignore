@@ -1,0 +1,4 @@
+/server/bin/*
+/server/lib/*
+/server/include/*
+/server/__pycache__/*
