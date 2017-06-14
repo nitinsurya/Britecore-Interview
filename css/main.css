@@ -1,0 +1,30 @@
+.container {
+    max-width: 900px;
+}
+
+.feature, .add_feature {
+    width: 320px;
+    min-height: 30px;
+    padding: 20px;
+}
+
+.add_feature {
+    width: 500px;
+}
+
+.add_feature h2 {
+    margin-top: 0px;
+}
+
+.client_radio {
+    margin-right: 20px;
+}
+
+.container .mdl-textfield__error {
+    display: none;
+    position: inherit;
+}
+
+.container .is-invalid .mdl-textfield__error {
+    display: block;
+}
