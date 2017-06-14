@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
         <script type="text/javascript" src="js/pager.min.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
 
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
@@ -21,7 +22,7 @@
         <div class="container mdl-grid">
          
             <div data-bind="page: {id: 'show', role: 'start'}">
-                <div>
+                <div class="page_button">
                     <a data-bind="page-href: '../add'">
                         <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">
                             <i class="material-icons">add</i>
@@ -29,10 +30,24 @@
                         </button>
                     </a>
                 </div>
-                <div data-bind="template: {name: 'featureTemplate', foreach: display_feats}"></div>
+                <!-- <div class="filters">
+                    <select data-bind="options: availableClientOptions,
+                                        value: filters.client,
+                                        optionsCaption: 'All'"></select>
+
+                    <select data-bind="options: availableProductsAreas,
+                                        value: filters.product_area,
+                                        optionsCaption: 'All'"></select>
+                </div> -->
+                <div data-bind="template: {name: 'featureTemplate', foreach: display_feats, visible: display_feats().length > 0}"></div>
+                <div data-bind="visible: display_feats().length == 0">
+                    <div class="feature mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp">
+                        No feature requests currently present. Please add new feature requests.
+                    </div>
+                </div>
             </div>
             <div data-bind="page: {id: 'add'}">
-                <div>
+                <div class="page_button">
                     <a data-bind="page-href: '../'">
                         <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-js-ripple-effect" data-upgraded=",MaterialButton,MaterialRipple">
                             <i class="material-icons">arrow_back</i>
@@ -122,18 +137,6 @@
         <script type="text/javascript">
             pager.Href.hash = '#!/';
 
-            function getFormattedDate() {
-                var date = new Date();
-
-                var month = (1 + date.getMonth()).toString();
-                month = month.length > 1 ? month : '0' + month;
-
-                var day = date.getDate().toString();
-                day = day.length > 1 ? day : '0' + day;
-
-                return month + '/' + day + '/' + date.getFullYear();
-            };
-
             var req_url = "http://127.0.0.1:5000/";
 
             var feature_obj = function() {
@@ -157,53 +160,6 @@
                     });
                     this['date'](getFormattedDate());
                 }
-            }
-
-            function checkFormValid(new_feature) {
-                var flag = true;
-                if($.trim(new_feature().title()) == '') {
-                    flag = false;
-                    $('.nf_title').addClass("is-invalid");
-                } else {
-                    $('.nf_title').removeClass("is-invalid");
-                }
-
-                if($.trim(new_feature().description()) == '') {
-                    flag = false;
-                    $('.nf_desc').addClass("is-invalid");
-                } else {
-                    $('.nf_desc').removeClass("is-invalid");
-                }
-
-                if(new_feature().client() == '') {
-                    flag = false;
-                    $('.nf_client').addClass("is-invalid");
-                } else {
-                    $('.nf_client').removeClass("is-invalid");
-                }
-
-                if(new_feature().client_priority() == '' || new_feature().client_priority() < 0) {
-                    flag = false;
-                    $('.nf_client_priority').addClass("is-invalid");
-                } else {
-                    $('.nf_client_priority').removeClass("is-invalid");
-                }
-
-                if(new_feature().date() == '') {
-                    flag = false;
-                    $('.nf_date').addClass("is-invalid");
-                } else {
-                    $('.nf_date').removeClass("is-invalid");
-                }
-
-                if(new_feature().product_area() == '') {
-                    flag = false;
-                    $('.nf_pa').addClass("is-invalid");
-                } else {
-                    $('.nf_pa').removeClass("is-invalid");
-                }
-
-                return flag;
             }
 
             function getExistingFeatures() {
@@ -236,16 +192,18 @@
                 } else {
 
                 }
-            }
+            };
 
             var viewModel = {
                 new_feature: ko.observable(new feature_obj()),
                 display_feats: ko.observableArray([]),
+                filters: {'client': ko.observable(''), 'product_area': ko.observable('')},
                 availableProductsAreas: ['Policies', 'Billing', 'Claims', 'Reports'],
                 availableClientOptions: ['Client A', 'Client B', 'Client C'],
                 submitFeatureRequest: featureFormSubmit,
                 getExistingFeaturesRequest: getExistingFeatures
             };
+
 
             // extend your view-model with pager.js specific data
             pager.extendWithPage(viewModel);

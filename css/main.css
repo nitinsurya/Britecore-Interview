@@ -28,3 +28,8 @@
 .container .is-invalid .mdl-textfield__error {
     display: block;
 }
+
+.page_button {
+    float: left;
+    margin-left: -80px;
+}
